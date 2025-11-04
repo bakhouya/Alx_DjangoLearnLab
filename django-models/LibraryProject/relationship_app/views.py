@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 from .models import Book
+from django.views.generic.detail import DetailView
 from .models import Library
 
 
@@ -80,11 +81,11 @@ def delete_book(request, book_id):
 
 # ====================== Library Detail ======================
 
-class LibraryDetail(View):
-    def get(self, request, pk):
-        library = Library.objects.get(pk=pk)
-        return render(request, 'relationship_app/library_detail.html', {'library': library})
 
+class LibraryDetailView(DetailView):
+    model = Library
+    template_name = 'relationship_app/library_detail.html'
+    context_object_name = 'library'
 
 # ====================== Authentication ======================
 
