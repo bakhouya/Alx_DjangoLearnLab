@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
     'bookshelf',
     'relationship_app',
-    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -140,15 +139,15 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 
 #  change for week 11  =  custom user model
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 INSTALLED_APPS += ["csp"]
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
-CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+# CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
+# CSP_IMG_SRC = ("'self'", "data:")
+# CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "change-me-for-dev")
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
@@ -184,3 +183,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'font-src': ("'self'", 'https://cdn.jsdelivr.net'),
+        'img-src': ("'self'", 'data:'),
+        'script-src': ("'self'", 'https://cdn.jsdelivr.net'),
+        'style-src': ("'self'", 'https://cdn.jsdelivr.net')
+    }
+}
