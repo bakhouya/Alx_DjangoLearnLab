@@ -2,7 +2,7 @@
 # imports
 # ==============================================================================
 from rest_framework import generics, permissions, filters
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework
 from .models import Author, Book
 from .serializers import AuthorSerializer, BookSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -36,7 +36,7 @@ class BookListView(generics.ListAPIView):
     # any one can used this list 
     permission_classes = [permissions.AllowAny] 
     # filter and searching
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [rest_framework.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     # custom filter method
     filterset_class = BookFilter
     # fields can we searching with him

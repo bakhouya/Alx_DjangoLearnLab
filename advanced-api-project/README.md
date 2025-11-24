@@ -96,15 +96,15 @@ GET /api/books/<int:pk>/
 # Retrieves detailed information about a specific book identified by its ID.
 # Useful for displaying full information on a single record.
 
-PUT /api/books/<int:pk>/update/
+PUT /api/books/update/<int:pk>/
 # Fully updates all fields of the selected book.
 # Requires authentication to maintain data integrity.
 
-PATCH /api/books/<int:pk>/update/
+PATCH /api/books/update/<int:pk>/
 # Partially updates selected fields of a specific book.
 # Suitable for small modifications without replacing all data.
 
-DELETE /api/books/<int:pk>/delete/
+DELETE /api/books/delete/<int:pk>/
 # Deletes a specific book from the database permanently.
 # Protected by authentication to prevent unauthorized deletions.
 ````
