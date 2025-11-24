@@ -1,12 +1,13 @@
 # ==============================================================================
 # imports
 # ==============================================================================
-from rest_framework import generics, permissions, filters
+from rest_framework import generics, filters
 from django_filters import rest_framework
 from .models import Author, Book
 from .serializers import AuthorSerializer, BookSerializer
 from .permissions import IsOwnerOrReadOnly
 from .filters import BookFilter
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 # ==============================================================================
 
 
@@ -18,6 +19,7 @@ from .filters import BookFilter
 class AuthorListCreateView(generics.ListCreateAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]  
 # ==============================================================================
 
 
@@ -66,7 +68,7 @@ class BookDetailView(generics.RetrieveAPIView):
 class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all() 
     serializer_class = BookSerializer  
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     # costum create book
     def perform_create(self, serializer):
@@ -81,7 +83,7 @@ class BookCreateView(generics.CreateAPIView):
 class BookUpdateView(generics.UpdateAPIView):
     queryset = Book.objects.all() 
     serializer_class = BookSerializer  
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated,  IsOwnerOrReadOnly]
     def perform_update(self, serializer):
         serializer.save() 
 # ==========================================================================================
@@ -93,7 +95,7 @@ class BookUpdateView(generics.UpdateAPIView):
 class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all() 
     serializer_class = BookSerializer  
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly] 
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly] 
 # ==========================================================================================
 
 
