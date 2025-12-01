@@ -1,0 +1,44 @@
+{% extends "blog/base.html" %}
+{% block title %}Posts tagged "{{ tag.name }}"{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <h2 class="text text_name">Posts with tag: #{{ tag.name }}</h2>
+    <div class="hr_app"></div>
+
+    {% if posts %}
+        {% for post in posts %}
+            <div class="card_item margin_top">
+                
+                <div class="flex_between_center">
+                    <div class="flex_auto">
+                        <div class="avatar_xl">
+                            {{ post.author.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <div class="text text_base">{{ post.title }}</div>
+                            <small>{{ post.published_date|date:"Y-m-d H:i" }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="margin_top">{{ post.content|truncatewords:25 }}</p>
+
+                <div class="post_tags margin_top">
+                    {% for t in post.tags.all %}
+                        <a href="{% url 'tag_posts' t.name %}" class="tag_chip">#{{ t.name }}</a>
+                    {% endfor %}
+                </div>
+
+                <a href="{% url 'post_detail' post.pk %}" class="btn_secondary margin_top">
+                    Read more
+                </a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text text_base">No posts found for this tag.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

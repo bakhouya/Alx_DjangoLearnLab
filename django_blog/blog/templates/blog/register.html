@@ -1,0 +1,80 @@
+{% extends "blog/base.html" %}
+{% block title %} Register {% endblock %}
+
+{% block content %}
+<div class="auth_container flex_center">
+    <div class="auth_card">
+        <h3 class="text text_title text_center">Create Account</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+
+            <!-- ======================================================================================== -->
+            <!-- Username -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Username</label>
+                {{ form.username }}
+            </div>
+            {% if form.username.errors %}
+                <small class="input-error">{{ form.username.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <!-- ======================================================================================== -->
+            <!-- Email -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Email</label>
+                {{ form.email }}
+            </div>
+            {% if form.email.errors %}
+                <small class="input-error">{{ form.email.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <!-- ======================================================================================== -->
+            <!-- Password 1 -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Password</label>
+                {{ form.password1 }}
+            </div>
+            {% if form.password1.errors %}
+                <small class="input-error">{{ form.password1.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <!-- ======================================================================================== -->
+            <!-- Password 2 -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Confirm Password</label>
+                {{ form.password2 }}
+            </div>
+            {% if form.password2.errors %}
+                <small class="input-error">{{ form.password2.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <button class="btn_primary flex_center" type="submit">
+                Register
+            </button>
+        </form>
+
+        <div class="text text_base text_center">
+            <a href="{% url 'login' %}">Already Have an Account? Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "blog/base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Post{% else %}New Post{% endif %}{% endblock %}
+
+{% block content %}
+<section class="container flex_center content_app">
+    <div class="auth_card">
+        <h3>{% if form.instance.pk %}Edit Post{% else %}Create Post{% endif %}</h3>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="error-message">{{ form.non_field_errors.0 }}</div>
+            {% endif %}
+
+            <div class="box_field">
+                <label class="form_label">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}<small class="input-error">{{ form.title.errors.0 }}</small>{% endif %}
+            </div>
+
+            <div class="box_field">
+                <label class="form_label">Content</label>
+                {{ form.content }}
+                {% if form.content.errors %}<small class="input-error">{{ form.content.errors.0 }}</small>{% endif %}
+            </div>
+
+            <div class="box_field">
+                <label class="form_label">Tags</label>
+                {{ form.tags }}
+                {% if form.tags.errors %}<small class="input-error">{{ form.tags.errors.0 }}</small>{% endif %}
+            </div>
+
+            <button class="btn_primary" type="submit">
+                {% if form.instance.pk %}Update{% else %}Publish{% endif %}
+            </button>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

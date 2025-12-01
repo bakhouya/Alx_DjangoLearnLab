@@ -1,0 +1,54 @@
+
+
+
+{% extends "blog/base.html" %}
+{% block title %} Login {% endblock %}
+
+{% block content %}
+<div class="auth_container flex_center">
+    <div class="auth_card">
+        <h3 class="text text_title text_center">Login</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="error-message"> Incorrect username or password.</div>
+            {% endif %}
+
+            <!-- ======================================================================================== -->
+             <!-- Username Fied  -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Username</label>
+                {{ form.username }}
+            </div>
+            {% if form.username.errors %}
+              <small class="input-error">{{ form.username.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <!-- ======================================================================================== -->
+             <!-- Password Field  -->
+            <!-- ======================================================================================== -->
+            <div class="box_field">
+                <label class="form_label">Password</label>
+                {{ form.password }}
+            </div>
+            {% if form.password.errors %}
+              <small class="input-error">{{ form.password.errors.0 }}</small>
+            {% endif %}
+            <!-- ======================================================================================== -->
+
+
+            <button class="btn_primary flex_center" type="submit">
+                Login
+            </button>
+        </form>
+
+        <div class="text text_base text_center">
+            <a href="{% url 'register' %}">I Don't Has an Acount!  Register</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
