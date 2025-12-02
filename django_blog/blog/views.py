@@ -8,13 +8,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Tag, Comment
 from django.db.models import Q
 from .forms import RegisterForm, CommentForm, PostForm
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
-
-
-# -----------------------------
+# ===========================================================================================
 # REGISTRATION
-# -----------------------------
+# ===========================================================================================
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -26,10 +25,11 @@ def register_view(request):
         form = RegisterForm()
 
     return render(request, "blog/register.html", {"form": form})
+# ===========================================================================================
 
-# -----------------------------
+# ===========================================================================================
 # PROFILE VIEW
-# -----------------------------
+# ===========================================================================================
 @login_required
 def profile_view(request):
     if request.method == "POST":
@@ -38,16 +38,21 @@ def profile_view(request):
         return redirect("profile")
 
     return render(request, "blog/profile.html")
+# ===========================================================================================
 
 
-
+# ===========================================================================================
+# ===========================================================================================
 class PostListView(ListView):
     model = Post
     template_name = 'blog/posts_list.html'  
     context_object_name = 'posts'
     paginate_by = 2
     ordering = ['-published_date']
+# ===========================================================================================
 
+# ===========================================================================================
+# ===========================================================================================
 # Detail view (public)
 class PostDetailView(DetailView):
     model = Post
@@ -68,8 +73,10 @@ class PostDetailView(DetailView):
             context["editing_comment"] = comment
 
         return context
+# ===========================================================================================
 
-
+# ===========================================================================================
+# ===========================================================================================
 # Create new post (only authenticated)
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -82,7 +89,10 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         post = form.save(commit=True)
         return super().form_valid(form)
+# ===========================================================================================
 
+# ===========================================================================================
+# ===========================================================================================
 # Update post (only author)
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
@@ -98,7 +108,10 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         post = form.save(commit=True)
         return super().form_valid(form)
+# ===========================================================================================
 
+# ===========================================================================================
+# ===========================================================================================
 # Delete post (only author)
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
@@ -109,21 +122,15 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return post.author == self.request.user
+# ===========================================================================================
 
 
 
 
 
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
-from .models import Post, Comment
-from .forms import CommentForm
-
-# -------------------------------
+# ===========================================================================================
 # Create Comment
-# -------------------------------
+# ===========================================================================================
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
@@ -137,11 +144,12 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+# ===========================================================================================
 
 
-# -------------------------------
+# ===========================================================================================
 # Update Comment
-# -------------------------------
+# ===========================================================================================
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
     form_class = CommentForm
@@ -153,11 +161,12 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+# ===========================================================================================
 
 
-# -------------------------------
+# ===========================================================================================
 # Delete Comment
-# -------------------------------
+# ===========================================================================================
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = 'blog/comment_confirm_delete.html'
@@ -168,14 +177,11 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+# ===========================================================================================
 
 
-
-
-from django.views.generic import ListView
-from .models import Post
-from taggit.models import Tag
-
+# ===========================================================================================
+# ===========================================================================================
 class PostByTagListView(ListView):
     model = Post
     template_name = 'blog/tag_posts.html'
@@ -190,10 +196,11 @@ class PostByTagListView(ListView):
         context = super().get_context_data(**kwargs)
         context['tag'] = self.tag
         return context
+# ===========================================================================================
 
 
-
-
+# ===========================================================================================
+# ===========================================================================================
 def posts_by_tag(request, tag_name):
     tag = get_object_or_404(Tag, name=tag_name)
     posts = Post.objects.filter(tags=tag)
@@ -202,8 +209,10 @@ def posts_by_tag(request, tag_name):
         "tag": tag,
         "posts": posts
     })
+# ===========================================================================================
 
-
+# ===========================================================================================
+# ===========================================================================================
 def search_posts(request):
     q = request.GET.get('q', '').strip()
     posts = Post.objects.none()
@@ -214,3 +223,4 @@ def search_posts(request):
             Q(tags__name__icontains=q)
         ).distinct().order_by('-published_date')
     return render(request, 'blog/search_results.html', {'query': q, 'posts': posts})
+# ===========================================================================================

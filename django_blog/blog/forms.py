@@ -5,20 +5,28 @@ from .models import Post, Comment
 from taggit.forms import TagWidget
 
 
+# ===========================================================================================================
+# form RegisterForm
+# ===========================================================================================================
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     
     class Meta:
         model = User
-        fields = ["username", "email", "password1", "password2"]
-       
+        fields = ["username", "email", "password1", "password2"]       
         widgets = {
             "username": forms.TextInput(attrs={"class": "input_field"}),
             "first_name": forms.TextInput(attrs={"class": "input_field"}),
             "last_name": forms.TextInput(attrs={"class": "input_field"}),
             "email": forms.EmailInput(attrs={"class": "input_field"}),
         }
-
+# ===========================================================================================================
+# 
+# 
+# 
+# ===========================================================================================================
+# form PostForm
+# ===========================================================================================================
 class PostForm(forms.ModelForm):
     tags_input = forms.CharField(
         required=False,
@@ -51,14 +59,14 @@ class PostForm(forms.ModelForm):
                 setattr(post, '_pending_tags', new_tags)
             return post
             
-        widgets = {
-            'tags': TagWidget(),  
-        }
-
-
-
-
-
+        widgets = {'tags': TagWidget()}
+# ===========================================================================================================
+# 
+# 
+# 
+# ===========================================================================================================
+# form CommentForm
+# ===========================================================================================================
 class CommentForm(forms.ModelForm):
 
     class Meta:
@@ -67,3 +75,4 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'content': forms.Textarea(attrs={'rows':4, 'placeholder':'Write your comment...'})
         }  
+# ===========================================================================================================
