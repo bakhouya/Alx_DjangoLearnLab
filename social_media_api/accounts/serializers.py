@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import CustomUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -20,17 +19,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         
-        if CustomUser.objects.filter(email=data['email']).exists():
+        if User.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError({"email": "This email is already in use."})
         
-        if CustomUser.objects.filter(username=data['username']).exists():
+        if User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError({"username": "This username is already taken."})
         
         return data
 
     def create(self, data):
         data.pop('password2')
-        user = CustomUser.objects.create_user(**data)
+        user = User.objects.create_user(**data)
         Token.objects.create(user=user)
         return user
 
