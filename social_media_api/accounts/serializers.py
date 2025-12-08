@@ -64,6 +64,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'date_joined')
 
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    
+    def get_following_count(self, obj):
+        return obj.following.count()
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         sensitive_fields = ['password',]       
@@ -72,4 +78,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return representation
 
 
-
+class FollowActionSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()

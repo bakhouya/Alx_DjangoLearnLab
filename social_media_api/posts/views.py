@@ -1,12 +1,12 @@
 # posts/views.py
 
-from rest_framework import viewsets, permissions, status, filters
+from rest_framework import viewsets, permissions, status, filters, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment
 from .serializers import (PostSerializer, CommentSerializer)
-from django.shortcuts import get_object_or_404
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
@@ -82,3 +82,21 @@ class CommentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
             headers=headers
         )
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        following_users = self.request.user.following.all()
+        queryset = Post.objects.filter(author__in=following_users)
+        queryset = queryset.order_by('-created_at')
+        
+        return queryset

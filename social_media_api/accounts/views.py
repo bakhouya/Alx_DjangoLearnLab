@@ -1,9 +1,12 @@
 
 from rest_framework import status, generics, permissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerializer)
 User = get_user_model()
 
@@ -61,3 +64,33 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             return UserProfileSerializer
         return UserProfileSerializer
 
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    user_can_follow = get_object_or_404(User, id=user_id)
+
+    if user_can_follow == request.user:
+        return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not request.user.is_following(user_can_follow):
+        request.user.follow(user_can_follow)
+        return Response({'message': f'You are now following {user_can_follow.username}'}, status=status.HTTP_200_OK)
+    
+    return Response({'message': f'You are already following {user_can_follow.username}'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    user_to_unfollow = get_object_or_404(User, id=user_id)
+    
+    if user_to_unfollow == request.user:
+        return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.user.is_following(user_to_unfollow):
+        request.user.unfollow(user_to_unfollow)
+        return Response({'message': f'You have unfollowed {user_to_unfollow.username}'}, status=status.HTTP_200_OK)
+    
+    return Response({'message': f'You are not following {user_to_unfollow.username}'}, status=status.HTTP_200_OK)
