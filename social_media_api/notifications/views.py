@@ -12,7 +12,7 @@ class NotificationListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
+        return Notification.objects.filter(recipient=self.request.user).order_by('-timestamp')
 
 
 class UnreadNotificationListView(generics.ListAPIView):
@@ -20,7 +20,7 @@ class UnreadNotificationListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user, read=False).order_by('-created_at')
+        return Notification.objects.filter(recipient=self.request.user, read=False).order_by('-timestamp')
 
 
 class NotificationDetailView(generics.RetrieveUpdateDestroyAPIView):

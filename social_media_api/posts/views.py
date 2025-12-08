@@ -151,7 +151,7 @@ class UnlikePostView(generics.GenericAPIView):
         if not like:
             return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
         like.delete()
-        
+
         return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
 
 class PostLikesView(generics.ListAPIView):

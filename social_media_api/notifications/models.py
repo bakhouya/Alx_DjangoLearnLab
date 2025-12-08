@@ -22,13 +22,13 @@ class Notification(models.Model):
     target = GenericForeignKey('target_content_type', 'target_object_id')
 
     read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-timestamp']
         indexes = [
             models.Index(fields=['recipient', 'read']),
-            models.Index(fields=['created_at']),
+            models.Index(fields=['timestamp']),
         ]
     
     def __str__(self):
