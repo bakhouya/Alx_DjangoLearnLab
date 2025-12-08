@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerializer, FollowActionSerializer)
 User = get_user_model()
 from .models import CustomUser
-
+from notifications.models import Notification
 
 class UserRegisterView(generics.CreateAPIView):   
     queryset = User.objects.all()
@@ -67,7 +67,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
     
     def get_queryset(self):
         queryset = CustomUser.objects.all()
@@ -138,12 +138,20 @@ class FollowUserView(generics.GenericAPIView):
         
         if not request.user.is_following(user_to_follow):
             request.user.follow(user_to_follow)
+            if comment.author != user:
+             Notification.create_notification(
+                recipient=user_to_follow,  
+                actor=request.user,       
+                verb='follow',     
+                target=request.user     
+            )
             return Response({
                 'message': f'You are now following {user_to_follow.username}',
                 'following': True,
                 'user_id': user_id,
                 'username': user_to_follow.username
             }, status=status.HTTP_200_OK)
+
         else:
             return Response({
                 'message': f'You are already following {user_to_follow.username}',
