@@ -4,11 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerializer)
 User = get_user_model()
+from .models import CustomUser
 
 
 class UserRegisterView(generics.CreateAPIView):   
@@ -65,32 +65,55 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return UserProfileSerializer
 
 
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def follow_user(request, user_id):
-    user_can_follow = get_object_or_404(User, id=user_id)
-
-    if user_can_follow == request.user:
-        return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+class UserListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
     
-    if not request.user.is_following(user_can_follow):
-        request.user.follow(user_can_follow)
-        return Response({'message': f'You are now following {user_can_follow.username}'}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()
+        queryset = queryset.exclude(id=self.request.user.id)
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(username__icontains=search)
+        
+        return queryset
     
-    return Response({'message': f'You are already following {user_can_follow.username}'}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def unfollow_user(request, user_id):
-    user_to_unfollow = get_object_or_404(User, id=user_id)
+    @action(detail=True, methods=['post'])
+    def follow_user(self, request, pk=None):
+        user_to_follow = self.get_object()
+        
+        if user_to_follow == request.user:
+            return Response(
+                {'error': 'You cannot follow yourself'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not request.user.is_following(user_to_follow):
+            request.user.follow(user_to_follow)
+            message = f'You are now following {user_to_follow.username}'
+            following = True
+        else:
+            message = f'You are already following {user_to_follow.username}'
+            following = True
+        
+        return Response({
+            'message': message,
+            'following': following
+        }, status=status.HTTP_200_OK)
     
-    if user_to_unfollow == request.user:
-        return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if request.user.is_following(user_to_unfollow):
-        request.user.unfollow(user_to_unfollow)
-        return Response({'message': f'You have unfollowed {user_to_unfollow.username}'}, status=status.HTTP_200_OK)
-    
-    return Response({'message': f'You are not following {user_to_unfollow.username}'}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['post'])
+    def unfollow_user(self, request, pk=None):
+        user_to_unfollow = self.get_object()
+        
+        if user_to_unfollow == request.user:
+            return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if request.user.is_following(user_to_unfollow):
+            request.user.unfollow(user_to_unfollow)
+            message = f'You have unfollowed {user_to_unfollow.username}'
+            following = False
+        else:
+            message = f'You are not following {user_to_unfollow.username}'
+            following = False
+        
+        return Response({'message': message, 'following': following}, status=status.HTTP_200_OK)
