@@ -122,7 +122,7 @@ class LikePostView(generics.GenericAPIView):
     serializer_class = LikeSerializer
     
     def post(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         
         if not created:
@@ -144,7 +144,7 @@ class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def delete(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         
         try:
             like = Like.objects.get(user=request.user, post=post)
@@ -153,6 +153,7 @@ class UnlikePostView(generics.GenericAPIView):
             return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
         except Like.DoesNotExist:
             return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PostLikesView(generics.ListAPIView):
     serializer_class = LikeSerializer
