@@ -17,6 +17,13 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1:' + str(PORT),
 ]
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        "https://famedia.onrender.com",
+        "https://www.famedia.onrender.com",
+    ]
+else:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 
 
