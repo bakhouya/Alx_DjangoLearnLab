@@ -1,5 +1,5 @@
-# posts/views.py
-
+# ================================================================================
+# ================================================================================
 from rest_framework import viewsets, permissions, status, filters, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -8,8 +8,13 @@ from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment, Like
 from .serializers import (PostSerializer, CommentSerializer, LikeSerializer)
 from notifications.models import Notification
+# ================================================================================
 
 
+# ================================================================================
+# A permission granted to verify that the user is the content owner before allowing editing or deletion.
+# Read access is available to everyone, while writing is restricted to the actual owner of the content.
+# ================================================================================
 class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Les permissions de lecture sont autorisées pour toutes les requêtes
@@ -18,8 +23,15 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
         
         # Les permissions d'écriture sont réservées à l'auteur
         return obj.author == request.user
-
-
+# ================================================================================
+# 
+#
+# ================================================================================
+# CRUD's post interface.
+# Allows you to create, view, edit, and delete posts, with support for searching, sorting, and filtering.
+# Ensures automatic linking between a post and its author via request.user.
+# Also provides an additional path to fetch comments for a specific post.
+# ================================================================================
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
@@ -49,8 +61,14 @@ class PostViewSet(viewsets.ModelViewSet):
         
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
+# ================================================================================
+# 
+#
+# ================================================================================
+# CRUD interface for comments.
+# Allows adding comments and linking them to the author and the post, with notifications enabled for new comments.
+# Supports sorting and filtering results based on post_id.
+# ================================================================================
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
@@ -91,13 +109,24 @@ class CommentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
             headers=headers
         )
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# A pagination system designed to return results as pages.
+# Allows specifying page size via the page_size parameter, with a maximum limit to protect performance.
+# ================================================================================
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
-
+# ================================================================================
+# 
+#
+# ================================================================================
+# The feed interface displays posts only from people the user follows.
+# It uses the current user to determine the following list and sorts posts in descending order by creation date.
+# ================================================================================
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -108,15 +137,13 @@ class FeedView(generics.ListAPIView):
         queryset = Post.objects.filter(author__in=following_users).order_by('-created_at')
         
         return queryset
-
-
-
-
-
-
-
-
-
+# ================================================================================
+# 
+#
+# ================================================================================
+# An interface that enables users to like a post.
+# Prevents duplicate likes on the same post and creates a notification for the post's owner when a new like is received.
+# ================================================================================
 class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = LikeSerializer
@@ -138,8 +165,13 @@ class LikePostView(generics.GenericAPIView):
         
         serializer = self.get_serializer(like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
+# ================================================================================
+# 
+#
+# ================================================================================
+# An interface that enables users to like a post.
+# Prevents duplicate likes on the same post and creates a notification for the post's owner when a new like is received.
+# ================================================================================
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -153,8 +185,13 @@ class UnlikePostView(generics.GenericAPIView):
             return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
         except Like.DoesNotExist:
             return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# Displays a list of people who liked a specific post.
+# Uses the post_id in the link to retrieve all likes associated with that post.
+# ================================================================================
 class PostLikesView(generics.ListAPIView):
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -163,4 +200,5 @@ class PostLikesView(generics.ListAPIView):
         post_id = self.kwargs['post_id']
         post = get_object_or_404(Post, id=post_id)
         return Like.objects.filter(post=post)
+# ================================================================================
 

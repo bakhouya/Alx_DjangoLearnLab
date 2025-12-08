@@ -1,10 +1,10 @@
-# posts/models.py
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 
-
+# ================================================================================
+# Post model
+# ================================================================================
 class Post(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255)
@@ -21,8 +21,13 @@ class Post(models.Model):
     
     def __str__(self):
         return f"{self.title} by {self.author.username}"
-
-
+# ================================================================================
+# 
+# 
+# 
+# ================================================================================
+# Comment model
+# ================================================================================
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='comments')
@@ -39,8 +44,13 @@ class Comment(models.Model):
     
     def __str__(self):
         return f"Comment by {self.author.username} on {self.post.title}"
-
-
+# ================================================================================
+# 
+# 
+# 
+# ================================================================================
+# like model
+# ================================================================================
 class Like(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.CASCADE, related_name='likes')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
@@ -56,3 +66,4 @@ class Like(models.Model):
     
     def __str__(self):
         return f"{self.user.username} liked {self.post.title}"
+# ================================================================================

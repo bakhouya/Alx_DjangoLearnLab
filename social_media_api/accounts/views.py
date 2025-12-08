@@ -1,4 +1,5 @@
-
+# ================================================================================# 
+# ================================================================================
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -10,7 +11,15 @@ from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerial
 User = get_user_model()
 from .models import CustomUser
 from notifications.models import Notification
+# ================================================================================
 
+
+
+# ================================================================================
+# New user registration interface.
+# Creates a new account, verifies data, and then issues JWT tokens to the user.
+# User data is returned with a success message after registration is complete.
+# ================================================================================
 class UserRegisterView(generics.CreateAPIView):   
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -30,8 +39,14 @@ class UserRegisterView(generics.CreateAPIView):
             },
             'message': 'User registered successfully'
         }, status=status.HTTP_201_CREATED)
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# Login interface.
+# Verifies user data, then issues new JWT tokens.
+# Also returns the user profile with a login success message.
+# ================================================================================
 class UserLoginView(ObtainAuthToken):
     serializer_class = LoginSerializer
     permission_classes = [permissions.AllowAny]
@@ -51,8 +66,13 @@ class UserLoginView(ObtainAuthToken):
             },
             'message': 'User Login successfully'
         })
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# An interface for viewing and updating the current user's profile.
+# Allows the user to view or edit their data, as the returned object is request.user.
+# ================================================================================
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -63,8 +83,14 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         if self.request.method in ['PUT', 'PATCH']:
             return UserProfileSerializer
         return UserProfileSerializer
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# User list display interface.
+# Excludes the current user from results and supports name search.
+# Also includes follow and unfollow functions for following or unfollowing users.
+# ================================================================================
 class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserProfileSerializer
@@ -117,8 +143,17 @@ class UserListView(generics.ListAPIView):
             following = False
         
         return Response({'message': message, 'following': following}, status=status.HTTP_200_OK)
-
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# A dedicated interface for executing the follow process.
+# Receives the user ID via Serializer, then checks:
+# - Prevents self-following
+# - Executes the follow if it doesn't exist
+# - Sends a notification to the followed user
+# Returns a clear message with the follow status.
+# ================================================================================
 class FollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FollowActionSerializer
@@ -159,8 +194,16 @@ class FollowUserView(generics.GenericAPIView):
                 'user_id': user_id,
                 'username': user_to_follow.username
             }, status=status.HTTP_200_OK)
- 
-
+# ================================================================================
+# 
+# 
+# ================================================================================
+# Unfollow interface.
+# Receives user_id and checks:
+# - Prevents self-unfollowing
+# - Executes unfollowing only if the user is following
+# Returns a message explaining the result and the follow status after the process.
+# ================================================================================
 class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FollowActionSerializer
@@ -192,4 +235,4 @@ class UnfollowUserView(generics.GenericAPIView):
                 'user_id': user_id,
                 'username': user_to_unfollow.username
             }, status=status.HTTP_200_OK)
-
+# ================================================================================

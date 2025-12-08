@@ -1,11 +1,13 @@
-# notifications/serializers.py
 
 from rest_framework import serializers
 from .models import Notification
 from django.contrib.auth import get_user_model
-
 User = get_user_model()
 
+
+# ======================================================
+# notifications serializers
+# ======================================================
 class NotificationSerializer(serializers.ModelSerializer):
     actor_username = serializers.CharField(source='actor.username', read_only=True)
     recipient_username = serializers.CharField(source='recipient.username', read_only=True)
@@ -20,6 +22,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         if object.target_content_type:
             return object.target_content_type.model
         return None
+# ======================================================
 
 
 

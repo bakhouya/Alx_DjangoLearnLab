@@ -2,16 +2,22 @@
 from rest_framework import serializers
 from .models import Post, Comment, Like
 from django.contrib.auth import get_user_model
-
 User = get_user_model()
 
-
+# ===================================================================
+# Bas user serializes
+# ===================================================================
 class UserBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
-
-
+        fields = ['id', 'username', 'email', 'profile_picture']
+# ===================================================================
+# 
+# 
+# 
+# ===================================================================
+# Comment serializes
+# ===================================================================
 class CommentSerializer(serializers.ModelSerializer):
     author = UserBriefSerializer(read_only=True)
     
@@ -23,8 +29,11 @@ class CommentSerializer(serializers.ModelSerializer):
     def create(self, data):
         data['author'] = self.context['request'].user
         return super().create(data)
+# ===================================================================
 
-
+# ===================================================================
+# Post serializes
+# ===================================================================
 class PostSerializer(serializers.ModelSerializer):
     author = UserBriefSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
@@ -45,8 +54,13 @@ class PostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
-
-
+# ===================================================================
+# 
+# 
+# 
+# ===================================================================
+# Like serializes
+# ===================================================================
 class LikeSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
     post = serializers.PrimaryKeyRelatedField(read_only=True)   
@@ -54,3 +68,4 @@ class LikeSerializer(serializers.ModelSerializer):
         model = Like
         fields = ['id', 'user', 'post', 'created_at']
         read_only_fields = ['user', 'post', 'created_at']
+# ===================================================================

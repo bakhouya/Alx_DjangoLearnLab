@@ -3,9 +3,11 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Post
-
 User = get_user_model()
 
+# ===========================================================
+# test feed posts
+# ===========================================================
 class FeedTest(TestCase):
 
     def setUp(self):
@@ -28,14 +30,14 @@ class FeedTest(TestCase):
         )
         
         self.client.force_authenticate(user=self.user1)
-    
+    #  test posts whitout following
     def test_feed_without_following(self):
         url = '/api/posts/feed/'
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 0)
-    
+    # test get posts with following
     def test_feed_with_following(self):
         self.user1.follow(self.user2)
         
@@ -44,3 +46,4 @@ class FeedTest(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
+# ===========================================================

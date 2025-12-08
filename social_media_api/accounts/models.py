@@ -1,13 +1,15 @@
-# accounts/models.py
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+# ======================================================================
+# Custom User Model
+# ======================================================================
 class CustomUser(AbstractUser):
     bio = models.TextField(_('bio'), max_length=500, blank=True)
     profile_picture = models.ImageField(_('profile picture'), upload_to='profile_pictures/', blank=True, null=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
-    # following = models.ManyToManyField('self', related_name='followers', symmetrical=False, blank=True)
 
     class Meta:
         verbose_name = _('user')
@@ -38,6 +40,8 @@ class CustomUser(AbstractUser):
 
     def is_following(self, user):
         return self.following.filter(id=user.id).exists()
+
+# ======================================================================
 
 
 

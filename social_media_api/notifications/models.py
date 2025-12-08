@@ -1,4 +1,3 @@
-# notifications/models.py
 
 from django.db import models
 from django.conf import settings
@@ -6,6 +5,11 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+
+
+# ===================================================================
+# notifications Model
+# ===================================================================
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('follow', 'New Follower'),
@@ -47,3 +51,4 @@ class Notification(models.Model):
             notification.save()
         
         return notification
+# ===================================================================

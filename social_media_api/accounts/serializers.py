@@ -5,6 +5,11 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+
+
+# =====================================================================================
+#  Register New User serializers
+# =====================================================================================
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -39,8 +44,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         Token.objects.create(user=user)
         return user
-
-
+# =====================================================================================
+# 
+# 
+# =====================================================================================
+#  login serializers
+# =====================================================================================
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -54,8 +63,12 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid credentials")
             else:
                 return {'user': user}
-
-
+# =====================================================================================
+# 
+# 
+# =====================================================================================
+#  User profile  serializers
+# =====================================================================================
 class UserProfileSerializer(serializers.ModelSerializer):
     followers_count = serializers.ReadOnlyField()
     following_count = serializers.ReadOnlyField()
@@ -76,7 +89,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         for field in sensitive_fields:
             representation.pop(field, None)
         return representation
-
-
+# =====================================================================================
+# 
+# 
+# =====================================================================================
+#  follow action serializers
+# =====================================================================================
 class FollowActionSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
+# =====================================================================================
