@@ -6,7 +6,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
-from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerializer)
+from .serializers import (RegisterSerializer, LoginSerializer, UserProfileSerializer, FollowActionSerializer)
 User = get_user_model()
 from .models import CustomUser
 
@@ -117,3 +117,71 @@ class UserListView(generics.ListAPIView):
             following = False
         
         return Response({'message': message, 'following': following}, status=status.HTTP_200_OK)
+
+
+class FollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FollowActionSerializer
+    
+    def get_queryset(self):
+        return CustomUser.objects.all()
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user_id = serializer.validated_data['user_id']
+        user_to_follow = get_object_or_404(User, id=user_id)
+
+        if user_to_follow == request.user:
+            return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not request.user.is_following(user_to_follow):
+            request.user.follow(user_to_follow)
+            return Response({
+                'message': f'You are now following {user_to_follow.username}',
+                'following': True,
+                'user_id': user_id,
+                'username': user_to_follow.username
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'message': f'You are already following {user_to_follow.username}',
+                'following': True,
+                'user_id': user_id,
+                'username': user_to_follow.username
+            }, status=status.HTTP_200_OK)
+ 
+
+class UnfollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FollowActionSerializer
+    
+    def get_queryset(self):
+        return CustomUser.objects.all()
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user_id = serializer.validated_data['user_id']
+        user_to_unfollow = get_object_or_404(User, id=user_id)
+        if user_to_unfollow == request.user:
+            return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if request.user.is_following(user_to_unfollow):
+            request.user.unfollow(user_to_unfollow)
+            return Response({
+                'message': f'You have unfollowed {user_to_unfollow.username}',
+                'following': False,
+                'user_id': user_id,
+                'username': user_to_unfollow.username
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'message': f'You are not following {user_to_unfollow.username}',
+                'following': False,
+                'user_id': user_id,
+                'username': user_to_unfollow.username
+            }, status=status.HTTP_200_OK)
+
