@@ -7,3 +7,5 @@ services:
       python manage.py migrate
       python manage.py collectstatic --noinput
     startCommand: "uvicorn social_media_api.asgi:application --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/
+    autoDeploy: true
