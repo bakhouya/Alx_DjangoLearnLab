@@ -11,11 +11,11 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: don't run with debug turned on in production!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-please-change-in-production')
 DEBUG = False
-
+PORT = int(os.environ.get('PORT', 8000))
 ALLOWED_HOSTS = [
     'famedia.onrender.com',
     'localhost',
-    '127.0.0.1',
+    '127.0.0.1:' + str(PORT),
 ]
 
 
@@ -87,6 +87,10 @@ if DATABASE_URL:
         conn_max_age=600,
         ssl_require=True
     )
+    if 'default' in DATABASES and DATABASES['default'].get('PORT'):
+        DATABASES['default']['PORT'] = DATABASES['default'].get('PORT')
+    else:
+        DATABASES['default']['PORT'] = '5432' 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
