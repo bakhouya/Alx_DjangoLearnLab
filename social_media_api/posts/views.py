@@ -121,37 +121,38 @@ class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = LikeSerializer
     
-    def post(self, request, post_id):
+    def post(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk)
-        user = request.user
-        like, created = Like.objects.get_or_create(user=user, post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        
         if not created:
             return Response({'error': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if post.author != user:
+        if post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
-                actor=user,
+                actor=request.user,
                 verb='like',
+                message=f'{request.user.username} liked your post: {post.title}',
                 target=post
             )
         
-        serializer = LikeSerializer(like)
+        serializer = self.get_serializer(like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
-    def delete(self, request, post_id):
+    def delete(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk)
-        user = request.user
+        
         try:
-            like = Like.objects.get(user=user, post=post)
+            like = Like.objects.get(user=request.user, post=post)
             like.delete()
             
-            return Response({'message': 'Post unliked successfully'},status=status.HTTP_200_OK)
+            return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
         except Like.DoesNotExist:
-            return Response({'error': 'You have not liked this post'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
 
 class PostLikesView(generics.ListAPIView):
     serializer_class = LikeSerializer
