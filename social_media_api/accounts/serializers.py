@@ -28,8 +28,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, data):
-        data.pop('password2')
-        user = User.objects.create_user(**data)
+        user = User.objects.create_user(
+            username        = data['username'],
+            email           = data['email'],
+            first_name      = data['first_name'],
+            last_name       = data['last_name'],
+            password        = data['password'],
+            bio             = data.get('bio', ''),
+            profile_picture = data.get('profile_picture', None)
+        )
         Token.objects.create(user=user)
         return user
 
