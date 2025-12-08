@@ -122,15 +122,14 @@ class LikePostView(generics.GenericAPIView):
     serializer_class = LikeSerializer
     
     def post(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
-        if Like.objects.filter(user=user, post=post).exists():
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        if not created:
             return Response({'error': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
 
-        like = Like.objects.create(user=user, post=post)
-        
         if post.author != user:
-            Notification.create_notification(
+            Notification.objects.create(
                 recipient=post.author,
                 actor=user,
                 verb='like',
@@ -144,15 +143,15 @@ class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def delete(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
-        like = Like.objects.filter(user=user, post=post).first()
-        
-        if not like:
-            return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
-        like.delete()
-
-        return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
+        try:
+            like = Like.objects.get(user=user, post=post)
+            like.delete()
+            
+            return Response({'message': 'Post unliked successfully'},status=status.HTTP_200_OK)
+        except Like.DoesNotExist:
+            return Response({'error': 'You have not liked this post'},status=status.HTTP_400_BAD_REQUEST)
 
 class PostLikesView(generics.ListAPIView):
     serializer_class = LikeSerializer
